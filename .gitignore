@@ -131,3 +131,4 @@ dmypy.json
 typings
 
 .databricks
+.DS_Store
