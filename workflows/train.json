@@ -1,32 +1,25 @@
 {
-    "job_id": 263939477239628,
-    "creator_user_name": "rafael.pierre@databricks.com",
-    "run_as_user_name": "rafael.pierre@databricks.com",
-    "run_as_owner": true,
-    "settings": {
-        "name": "job_demand_forecasting",
-        "email_notifications": {
-            "no_alert_for_skipped_runs": false
-        },
-        "webhook_notifications": {},
-        "timeout_seconds": 0,
-        "max_concurrent_runs": 1,
-        "tasks": [
-            {
-                "task_key": "train",
-                "notebook_task": {
-                    "notebook_path": "/Repos/rafael.pierre@databricks.com/databricks-demand-forecasting.ide/notebooks/01_train",
-                    "source": "WORKSPACE"
-                },
-                "existing_cluster_id": "1011-090100-bait793",
-                "max_retries": 2,
-                "min_retry_interval_millis": 900000,
-                "retry_on_timeout": false,
-                "timeout_seconds": 0,
-                "email_notifications": {}
-            }
-        ],
-        "format": "MULTI_TASK"
+    "name": "job_demand_forecasting",
+    "email_notifications": {
+        "no_alert_for_skipped_runs": false
     },
-    "created_time": 1676897982936
+    "webhook_notifications": {},
+    "timeout_seconds": 0,
+    "max_concurrent_runs": 1,
+    "tasks": [
+        {
+            "task_key": "train",
+            "notebook_task": {
+                "notebook_path": "/Repos/rafael.pierre@databricks.com/databricks-demand-forecasting.ide/notebooks/01_train",
+                "source": "WORKSPACE"
+            },
+            "existing_cluster_id": "0812-165614-tibia842",
+            "max_retries": 2,
+            "min_retry_interval_millis": 900000,
+            "retry_on_timeout": false,
+            "timeout_seconds": 0,
+            "email_notifications": {}
+        }
+    ],
+    "format": "MULTI_TASK"
 }
