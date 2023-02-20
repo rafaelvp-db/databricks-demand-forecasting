@@ -13,9 +13,6 @@ dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset al
 # DBTITLE 1,Install Required Libraries
 # MAGIC %pip install fbprophet
 
-# COMMAND ----------
-
-# MAGIC %run ./_resources/00-fine-grained-setup $reset_all_data=$reset_all_data
 
 # COMMAND ----------
 
@@ -27,11 +24,12 @@ dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset al
 
 # DBTITLE 1,Review Raw Data
 # read the training file into a dataframe
+spark.sql("CREATE DATABASE IF NOT EXISTS rvp")
 sales = spark.read.csv('/mnt/field-demos/retail/fgforecast/train.csv', header=True, schema="date date, store int, item int, sales int")
-sales.dropna().write.mode('overwrite').saveAsTable('sales')
+sales.dropna().write.mode('overwrite').saveAsTable('rvp.sales')
 
 # show data
-display(spark.read.table("sales"))
+display(spark.read.table("rvp.sales"))
 
 # COMMAND ----------
 
@@ -45,7 +43,7 @@ display(spark.read.table("sales"))
 # MAGIC SELECT
 # MAGIC   year(date) as year, 
 # MAGIC   sum(sales) as sales
-# MAGIC FROM sales
+# MAGIC FROM rvp.sales
 # MAGIC GROUP BY year(date)
 # MAGIC ORDER BY year;
 
@@ -57,7 +55,7 @@ display(spark.read.table("sales"))
 # MAGIC SELECT 
 # MAGIC   TRUNC(date, 'MM') as month,
 # MAGIC   SUM(sales) as sales
-# MAGIC FROM sales
+# MAGIC FROM rvp.sales
 # MAGIC GROUP BY TRUNC(date, 'MM')
 # MAGIC ORDER BY month;
 
@@ -74,7 +72,7 @@ display(spark.read.table("sales"))
 # MAGIC   SELECT 
 # MAGIC     date,
 # MAGIC     SUM(sales) as sales
-# MAGIC   FROM sales
+# MAGIC   FROM rvp.sales
 # MAGIC   GROUP BY date
 # MAGIC  ) x
 # MAGIC GROUP BY year, weekday
@@ -96,7 +94,7 @@ display(spark.read.table("sales"))
 # MAGIC   COUNT(DISTINCT item) as items,
 # MAGIC   COUNT(DISTINCT year(date)) as years,
 # MAGIC   COUNT(*) as records
-# MAGIC FROM sales;
+# MAGIC FROM rvp.sales;
 
 # COMMAND ----------
 
@@ -118,6 +116,10 @@ display(spark.read.table("sales"))
 
 
 #train the model using fbProphet
+import pandas as pd
+from prophet import Prophet
+from pyspark.sql import functions as f
+
 def train_model(history_pd: pd.DataFrame) -> Prophet:
   # configure the model
   model = Prophet(
@@ -160,19 +162,22 @@ def forecast_item(history_pd: pd.DataFrame) -> pd.DataFrame:
 
 forecast = (
   spark
-    .table('sales')
+    .table('rvp.sales')
     .withColumnRenamed('date','ds')
     .groupBy('item', 'ds')
       .agg(f.sum('sales').alias('y'))
     .orderBy('item','ds')
     .groupBy('item')
-      .applyInPandas(forecast_item, schema="ds date, item int, y float, yhat float, yhat_upper float, yhat_lower float")
+      .applyInPandas(
+        forecast_item,
+        schema="ds date, item int, y float, yhat float, yhat_upper float, yhat_lower float"
+      )
     .withColumn('training_date', f.current_date()))
 
 # allocation ratios
 ratios = spark.sql('''SELECT store, item, sales / SUM(sales) OVER(PARTITION BY item) as ratio FROM (
                         SELECT store, item, SUM(sales) as sales
-                        FROM sales
+                        FROM rvp.sales
                         GROUP BY store, item)''')
 
 results = (
@@ -185,9 +190,9 @@ results = (
 (results
     .write
     .mode('overwrite')
-    .saveAsTable('allocated_forecasts'))
+    .saveAsTable('rvp.allocated_forecasts'))
 
-display(spark.table('allocated_forecasts'))
+display(spark.table('rvp.allocated_forecasts'))
 
 # COMMAND ----------
 
@@ -209,7 +214,7 @@ display(spark.table('allocated_forecasts'))
 
 # retrieve historical data
 store_item_history = (
-  spark.sql('''SELECT store, item, CAST(date as date) as ds, SUM(sales) as y FROM sales
+  spark.sql('''SELECT store, item, CAST(date as date) as ds, SUM(sales) as y FROM rvp.sales
               GROUP BY store, item, ds
               ORDER BY store, item, ds'''))
 
@@ -273,7 +278,7 @@ display(spark.table('finegrain_forecasts').drop('forecast_upper','forecast_lower
 # MAGIC   store,
 # MAGIC   date,
 # MAGIC   forecast
-# MAGIC FROM allocated_forecasts
+# MAGIC FROM rvp.allocated_forecasts
 # MAGIC WHERE item = 1 AND 
 # MAGIC       date >= '2018-01-01' AND 
 # MAGIC       training_date=current_date()
@@ -288,7 +293,7 @@ display(spark.table('finegrain_forecasts').drop('forecast_upper','forecast_lower
 # MAGIC   store,
 # MAGIC   date,
 # MAGIC   forecast
-# MAGIC FROM finegrain_forecasts a
+# MAGIC FROM rvp.finegrain_forecasts a
 # MAGIC WHERE item = 1 AND
 # MAGIC       date >= '2018-01-01' AND
 # MAGIC       training_date=current_date()
