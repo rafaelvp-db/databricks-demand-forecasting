@@ -7,15 +7,6 @@ dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset al
 # MAGIC %md 
 # MAGIC # Fine Grained Demand Forecast
 # MAGIC This demo is intended for business-aligned personas who are more interested in our ability to enable business outcomes than the exact technical details of how we do it.  For that reason, much of the code in this notebook has been hidden and the logic itself has been streamlined to get right to the points they are concerned with.  If you require a more technically-oriented presentation, please consider using the notebook associated with the [solution accelerator](https://databricks.com/blog/2021/04/06/fine-grained-time-series-forecasting-at-scale-with-facebook-prophet-and-apache-spark-updated-for-spark-3.html).
-# MAGIC 
-# MAGIC Be sure to select **View: Results Only** before presenting it to customers.
-# MAGIC <!-- do not remove -->
-# MAGIC <img width="1px" src="https://www.google-analytics.com/collect?v=1&gtm=GTM-NKQ8TT7&tid=UA-163989034-1&cid=555&aip=1&t=event&ec=field_demos&ea=display&dp=%2F42_field_demos%2Fretail%2Fnotebook_fine_grained&dt=RETAIL_USE_CASE">
-# MAGIC <!-- [metadata={"description":"Non technical demo to present how Databricks can scale demand forecast at the item level. Can be used to win the Supply business decision makers (BDMs) control the budget for projects but require support from IT.</i>",
-# MAGIC  "authors":["bryan.smith@databricks.com"],
-# MAGIC   "db_resources":{"Dashboards": ["Retail: FineGrained Forecasting"]},
-# MAGIC   "search_tags":{"vertical": "retail", "step": "ML", "components": ["prophet", "mlflow"]},
-# MAGIC                  "canonicalUrl": {"AWS": "", "Azure": "", "GCP": ""}}] -->
 
 # COMMAND ----------
 
