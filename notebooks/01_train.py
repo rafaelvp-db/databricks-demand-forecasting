@@ -254,9 +254,9 @@ results = (
 (results
     .write
     .mode('overwrite')
-    .saveAsTable('finegrain_forecasts'))
+    .saveAsTable('rvp.finegrain_forecasts'))
 
-display(spark.table('finegrain_forecasts').drop('forecast_upper','forecast_lower'))
+display(spark.table('rvp.finegrain_forecasts').drop('forecast_upper','forecast_lower'))
 
 # COMMAND ----------
 
